@@ -1,0 +1,29 @@
+# Java build
+bin/
+build/
+out/
+target/
+*.class
+
+# ANTLR generated
+*.interp
+*.tokens
+*Lexer.java
+*Parser.java
+*Listener.java
+*BaseListener.java
+*Visitor.java
+*BaseVisitor.java
+
+# Eclipse
+.classpath
+.project
+.settings/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+*.tmp
