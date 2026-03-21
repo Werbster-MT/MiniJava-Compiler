@@ -1,0 +1,15 @@
+// INVÁLIDO: operador não suportado (%) 
+
+class OpInvalido {
+  public static void main(String[] a) {
+    System.out.println(new Calc().run());
+  }
+}
+
+class Calc {
+  public int run() {
+    int x;
+    x = 10 % 3;
+    return x;
+  }
+}

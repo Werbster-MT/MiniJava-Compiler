@@ -1,0 +1,35 @@
+// Testa: todas as formas de exp
+//   - operadores: + - * < &&
+//   - acesso a array: v[i]
+//   - length: v.length
+//   - chamada de metodo: obj.metodo(args)
+//   - new int[], new Classe()
+//   - !, this, true, false, INTEGER_LITERAL
+
+class TesteExp {
+  public static void main(String[] a) {
+    System.out.println(new Calc().run());
+  }
+}
+
+class Calc {
+  public int run() {
+    int[] v;
+    int resultado;
+    boolean b;
+
+    v = new int[10];
+    v[0] = 5;
+    v[1] = 3;
+
+    resultado = v[0] + v[1];       // op: +
+    resultado = v[0] - v[1];       // op: -
+    resultado = v[0] * v[1];       // op: *
+    b = v[0] < v[1];               // op: <
+    b = true && false;             // op: &&
+    b = !b;                        // ! exp
+    resultado = v.length;          // exp.length
+
+    return resultado;
+  }
+}

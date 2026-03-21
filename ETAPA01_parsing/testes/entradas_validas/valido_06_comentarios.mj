@@ -1,0 +1,15 @@
+// Testa: regras lexicas de comentario
+// LINE_COMMENT: linha unica com //
+/* BLOCK_COMMENT: bloco com /* ... */ */
+
+/*
+  Programa com comentarios em varios lugares.
+  Deve ser ignorado pelo lexer.
+*/
+
+class TesteComentarios {
+  // comentario na classe principal
+  public static void main(String[] a) {
+    /* comentario inline */ System.out.println(42); // inline no fim
+  }
+}

@@ -1,0 +1,7 @@
+// INVÁLIDO: identificador começa com número (regra léxica Identifier)
+
+class 1Invalido {
+  public static void main(String[] a) {
+    System.out.println(0);
+  }
+}

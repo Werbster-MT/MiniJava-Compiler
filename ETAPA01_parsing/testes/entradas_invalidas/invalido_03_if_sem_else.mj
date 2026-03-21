@@ -1,0 +1,17 @@
+// INVÁLIDO: falta 'else' no if (MiniJava não permite if sem else)
+
+class SemElse {
+  public static void main(String[] a) {
+    System.out.println(0);
+  }
+}
+
+class Teste {
+  public int run() {
+    int x;
+    x = 0;
+    if (x < 1)
+      x = 10;
+    return x;
+  }
+}

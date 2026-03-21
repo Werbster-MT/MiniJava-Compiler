@@ -1,0 +1,46 @@
+// Testa: todas as formas de statement
+//   - bloco: { statement* }
+//   - if/else
+//   - while
+//   - System.out.println(exp)
+//   - atribuicao: id = exp
+//   - atribuicao de array: id[exp] = exp
+
+class TesteStatements {
+  public static void main(String[] a) {
+    System.out.println(new Stmts().run());
+  }
+}
+
+class Stmts {
+  public int run() {
+    int x;
+    int[] v;
+    int i;
+
+    x = 0;
+    v = new int[5];
+    i = 0;
+
+    // while
+    while (i < 5) {
+      v[i] = i;     // atribuição de array
+      i = i + 1;    // atribuição simples
+    }
+
+    // if/else
+    if (x < 1) {
+      x = 10;
+    } else {
+      x = 20;
+    }
+
+    // bloco aninhado
+    {
+      x = x + 1;
+      System.out.println(x);
+    }
+
+    return x;
+  }
+}

@@ -1,0 +1,14 @@
+// INVÁLIDO: método sem 'return'
+
+class SemReturn {
+  public static void main(String[] a) {
+    System.out.println(0);
+  }
+}
+
+class Teste {
+  public int run() {
+    int x;
+    x = 42;
+  }
+}

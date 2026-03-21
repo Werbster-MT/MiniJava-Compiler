@@ -2,7 +2,7 @@
 
 **Equipe 19**
 - Werbster Marques Teixeira [537205]
-- Guilherme Gomes Botelho
+- Guilherme Gomes Botelho [539008]
 
 ---
 
@@ -10,12 +10,65 @@
 
 Esta etapa corresponde à **primeira fase** do desenvolvimento de um compilador para a linguagem MiniJava, cujo alvo é a arquitetura MIPS. O objetivo é implementar o **front-end** do compilador, composto pelo analisador léxico (*lexer*) e pelo analisador sintático (*parser*), utilizando a ferramenta geradora de parsers **ANTLR 4** (*Another Tool for Language Recognition*).
 
-A gramática foi especificada no arquivo `MiniJava.g4`, no qual estão definidas tanto as regras léxicas quanto as regras sintáticas da linguagem. A partir desse arquivo, o ANTLR gera automaticamente as classes `MiniJavaLexer` e `MiniJavaParser` em Java, além das interfaces de *listener* (`MiniJavaListener`, `MiniJavaBaseListener`). A classe `Main.java` orquestra o pipeline de análise, alimentando o fluxo de entrada pelo lexer, encadeando os tokens ao parser e invocando a regra raiz da gramática (`goal`).
+A gramática foi especificada no arquivo `MiniJava.g4`, no qual estão definidas tanto as regras léxicas quanto as regras sintáticas da linguagem MiniJava completa conforme o manual de referência. A partir desse arquivo, o ANTLR gera automaticamente as classes `MiniJavaLexer` e `MiniJavaParser` em Java, além das interfaces de *listener* (`MiniJavaListener`, `MiniJavaBaseListener`). A classe `Main.java` orquestra o pipeline de análise, alimentando o fluxo de entrada pelo lexer, encadeando os tokens ao parser e invocando a regra raiz da gramática (`goal`).
 
-A gramática implementada nesta etapa reconhece a estrutura básica de uma declaração de classe MiniJava vazia:
+---
+
+## Status da Etapa
+
+A etapa foi **completamente concluída**.
+
+A gramática `MiniJava.g4` implementa todas as produções da linguagem MiniJava conforme o manual de referência (Apêndice A), cobrindo:
+
+- Todas as regras sintáticas: `goal`, `mainClass`, `classDecl` (com e sem `extends`), `varDecl`, `methodDecl`, `formalList`, `formalRest`, `type`, `statement`, `exp`, `expList`, `expRest`
+- Todas as regras léxicas: `INTEGER_LITERAL`, `Identifier`, `WS` (ignorado), `LINE_COMMENT` e `BLOCK_COMMENT` (ignorados)
+- Todos os operadores binários especificados: `+`, `-`, `*`, `<`, `&&`
+- Precedência de operadores resolvida diretamente na regra `exp`
+
+---
+
+## Erros de Execução Encontrados
+
+Nenhum erro de execução (*runtime exception*) foi identificado nas entradas testadas. Todas as entradas válidas foram aceitas pela gramática e produziram a árvore sintática corretamente. As entradas inválidas foram tratadas pelo mecanismo de recuperação de erros padrão do ANTLR (`DefaultErrorStrategy`), que reporta o erro sintático ou léxico no `stderr` **sem interromper abruptamente o processo** — ou seja, não há *crash*, apenas mensagens de erro descritivas.
+
+| Entrada | Tipo de erro reportado | Houve exception? |
+|---|---|---|
+| `invalido_01_sem_class.mj` | Erro sintático: `missing 'class'` | Não |
+| `invalido_02_id_com_numero.mj` | Erro léxico: `token recognition error` | Não |
+| `invalido_03_if_sem_else.mj` | Erro sintático: `missing 'else'` | Não |
+| `invalido_04_operador_invalido.mj` | Erro léxico: `token recognition error at '%'` | Não |
+| `invalido_05_sem_return.mj` | Erro sintático: `missing 'return'` | Não |
+
+---
+
+## Estrutura do Projeto
 
 ```
-class <Identifier> { }
+ETAPA01_parsing/
+├── MiniJava.g4                        # Gramática ANTLR 4 (léxica + sintática)
+├── Main.java                          # Ponto de entrada do compilador
+├── build.ps1                          # Script de build (gerar + compilar)
+├── MiniJavaLexer.java                 # Gerado pelo ANTLR
+├── MiniJavaParser.java                # Gerado pelo ANTLR
+├── MiniJavaListener.java              # Gerado pelo ANTLR
+├── MiniJavaBaseListener.java          # Gerado pelo ANTLR
+├── imgs/
+│   ├── testes_entradas_validas/       # Screenshots dos testes válidos
+│   └── testes_entradas_invalidas/     # Screenshots dos testes inválidos
+└── testes/
+    ├── entradas_validas/              # Programas MiniJava corretos
+    │   ├── valido_01_factorial.mj
+    │   ├── valido_02_tipos_e_vars.mj
+    │   ├── valido_03_expressoes.mj
+    │   ├── valido_04_statements.mj
+    │   ├── valido_05_heranca.mj
+    │   └── valido_06_comentarios.mj
+    └── entradas_invalidas/            # Programas com erros propositais
+        ├── invalido_01_sem_class.mj
+        ├── invalido_02_id_com_numero.mj
+        ├── invalido_03_if_sem_else.mj
+        ├── invalido_04_operador_invalido.mj
+        └── invalido_05_sem_return.mj
 ```
 
 ---
@@ -35,13 +88,14 @@ class <Identifier> { }
 
 ## Setup — Geração dos Arquivos do Parser
 
-Após clonar ou descompactar o projeto, navegue até o diretório `ETAPA 1 - parsing` e execute o ANTLR sobre o arquivo de gramática para gerar os artefatos Java:
+Após clonar ou descompactar o projeto, navegue até o diretório `ETAPA01_parsing` e execute o ANTLR sobre o arquivo de gramática para gerar os artefatos Java:
 
 ```bash
-java -jar C:\antlr\antlr-4.13.2-complete.jar MiniJava.g4
+java -jar "C:\antlr\antlr-4.13.2-complete.jar" MiniJava.g4
 ```
 
 Isso gera os seguintes arquivos:
+
 | Arquivo gerado | Descrição |
 |---|---|
 | `MiniJavaLexer.java` | Analisador léxico gerado automaticamente |
@@ -54,63 +108,203 @@ Isso gera os seguintes arquivos:
 Em seguida, compile todos os arquivos Java:
 
 ```bash
-javac -cp .;C:\antlr\antlr-4.13.2-complete.jar *.java
+javac -cp ".;C:\antlr\antlr-4.13.2-complete.jar" *.java
 ```
 
----
-
-## Status da Etapa
-
-A etapa foi **parcialmente concluída**.
-
-Foi implementada a estrutura de *pipeline* do compilador (entrada → lexer → stream de tokens → parser → árvore sintática) e a gramática contém a regra sintática raiz `goal`, que reconhece a declaração de uma classe MiniJava vazia (`class <Identifier> { }`), além das regras léxicas para `Identifier` e descarte de espaços em branco (`WS`).
-
-**O que não foi concluído:** A gramática ainda não contempla as demais produções da linguagem MiniJava completa, como declarações de métodos, variáveis, expressões, comandos (`if`, `while`, `return`, etc.) e a classe principal (`MainClass`). A expansão das regras da gramática para cobrir toda a especificação da linguagem é o escopo restante desta etapa.
+> **Dica:** Use o script `build.ps1` para executar os dois passos acima de uma vez:
+> ```powershell
+> .\build.ps1
+> ```
 
 ---
 
 ## Execução do Programa
 
-### Compilação e execução
-
-Após o setup, execute o programa com:
-
 ```bash
-java -cp .;C:\antlr\antlr-4.13.2-complete.jar Main
+java -cp ".;C:\antlr\antlr-4.13.2-complete.jar" Main
 ```
 
 O programa aguarda entrada via `stdin`. Digite o código MiniJava e, no Windows, pressione `Ctrl+Z` seguido de `Enter` para sinalizar o fim da entrada (EOF).
 
-### Testes realizados
+Ou redirecione um arquivo de teste diretamente:
 
-**Entrada válida (caso de sucesso):**
-```
-class MinhaClasse { }
-```
-**Saída esperada:**
-```
-Digite o código MiniJava (aperte Ctrl+Z e Enter no Windows para finalizar):
-class Test { }
-^Z
-
-Análise Léxica e Sintática concluída com sucesso!
-(goal 'class' Test '{' '}' <EOF>)
+```bash
+java -cp ".;C:\antlr\antlr-4.13.2-complete.jar" Main < testes\entradas_validas\valido_01_factorial.mj
 ```
 
-![Entrada Válida](imgs/entrada_valida.png)
+---
 
+## Testes Realizados
 
-**Entrada inválida (caso de erro sintático):**
+### Entradas Válidas
+
+Programas que seguem a gramática MiniJava e devem ser aceitos sem erros.
+
+---
+
+#### `valido_01_factorial.mj` — Programa Fatorial (exemplo do manual)
+
+Testa: `mainClass`, `classDecl`, `methodDecl`, `varDecl`, `if/else`, `exp` com chamada de método, operadores e `this`.
+
+```java
+class Factorial {
+  public static void main(String[] a) {
+    System.out.println(new Fac().ComputeFac(10));
+  }
+}
+class Fac {
+  public int ComputeFac(int num) {
+    int num_aux;
+    if (num < 1)
+      num_aux = 1;
+    else
+      num_aux = num * (this.ComputeFac(num - 1));
+    return num_aux;
+  }
+}
 ```
-MyClass { }
+
+![valido_01_factorial](imgs/testes_entradas_validas/valido_01_factorial.png)
+
+---
+
+#### `valido_02_tipos_e_vars.mj` — Todos os Tipos e varDecl
+
+Testa: declarações com `int`, `boolean`, `int[]` e `Identifier` como tipo.
+
+```java
+class TesteTipos {
+  public static void main(String[] a) { System.out.println(0); }
+}
+class Tipos {
+  public int testaTipos(int x) {
+    int numero;  boolean flag;  int[] vetor;  Tipos obj;
+    numero = 42; flag = true;
+    return numero;
+  }
+}
 ```
-**Saída esperada:** O ANTLR reporta um erro de reconhecimento sintático, pois a entrada não satisfaz a regra `goal` (ausência da palavra-chave `class`).
 
-![Entrada Inválida](imgs/entrada_invalida.png)
+![valido_02_tipos_e_vars](imgs/testes_entradas_validas/valido_02_tipos_e_vars.png)
 
-### Erros de execução encontrados
+---
 
-Nenhum erro de execução (*runtime exception*) foi identificado nas entradas testadas. Entradas que violam a gramática são tratadas pelo mecanismo de recuperação de erros padrão do ANTLR (`DefaultErrorStrategy`), que reporta o erro no `stderr` sem interromper abruptamente o processo.
+#### `valido_03_expressoes.mj` — Todas as Formas de Expressão
+
+Testa: operadores `+`, `-`, `*`, `<`, `&&`, acesso a array `v[i]`, `.length`, `new int[]`, `new Classe()`, `!exp`.
+
+```java
+resultado = v[0] + v[1];   // op: +
+resultado = v[0] - v[1];   // op: -
+resultado = v[0] * v[1];   // op: *
+b = v[0] < v[1];           // op: <
+b = true && false;         // op: &&
+b = !b;                    // ! exp
+resultado = v.length;      // exp.length
+```
+
+![valido_03_expressoes](imgs/testes_entradas_validas/valido_03_expressoes.png)
+
+---
+
+#### `valido_04_statements.mj` — Todos os Statements
+
+Testa: `if/else`, `while`, `System.out.println`, atribuição simples (`id = exp`), atribuição de array (`id[exp] = exp`), bloco `{ statement* }`.
+
+![valido_04_statements](imgs/testes_entradas_validas/valido_04_statements.png)
+
+---
+
+#### `valido_05_heranca.mj` — Herança com `extends`
+
+Testa: `classDecl` com `extends`, `formalList` com múltiplos parâmetros (`formalRest`), `expList` com múltiplos argumentos (`expRest`).
+
+```java
+class Filho extends Pai {
+  public int soma(int a, int b) { return a + b + 1; }
+}
+```
+
+![valido_05_heranca](imgs/testes_entradas_validas/valido_05_heranca.png)
+
+---
+
+#### `valido_06_comentarios.mj` — Comentários Léxicos
+
+Testa: regras léxicas `LINE_COMMENT` (`//`) e `BLOCK_COMMENT` (`/* */`) sendo ignoradas pelo lexer.
+
+```java
+// comentário de linha
+/* comentário de bloco */
+/* comentario inline */ System.out.println(42); // fim de linha
+```
+
+![valido_06_comentarios](imgs/testes_entradas_validas/valido_06_comentarios.png)
+
+---
+
+### Entradas Inválidas
+
+Programas com erros propositais que devem gerar mensagens de erro do ANTLR.
+
+---
+
+#### `invalido_01_sem_class.mj` — Falta keyword `class`
+
+```java
+Factorial {  // falta 'class' antes
+  public static void main(String[] a) { ... }
+}
+```
+
+![invalido_01_sem_class](imgs/testes_entradas_invalidas/invalido_01_sem_class.png)
+
+---
+
+#### `invalido_02_id_com_numero.mj` — Identificador começando com dígito
+
+```java
+class 1Invalido { ... }  // identificador inválido léxicamente
+```
+
+![invalido_02_id_com_numero](imgs/testes_entradas_invalidas/invalido_02_id_com_numero.png)
+
+---
+
+#### `invalido_03_if_sem_else.mj` — `if` sem `else`
+
+```java
+if (x < 1)
+  x = 10;
+// sem 'else' — inválido em MiniJava
+return x;
+```
+
+![invalido_03_if_sem_else](imgs/testes_entradas_invalidas/invalido_03_if_sem_else.png)
+
+---
+
+#### `invalido_04_operador_invalido.mj` — Operador `%` não suportado
+
+```java
+x = 10 % 3;  // % não existe em MiniJava
+```
+
+![invalido_04_operador_invalido](imgs/testes_entradas_invalidas/invalido_04_operador_invalido.png)
+
+---
+
+#### `invalido_05_sem_return.mj` — Método sem `return`
+
+```java
+public int run() {
+  int x;
+  x = 42;
+  // sem 'return' — inválido
+}
+```
+
+![invalido_05_sem_return](imgs/testes_entradas_invalidas/invalido_05_sem_return.png)
 
 ---
 
@@ -119,6 +313,7 @@ Nenhum erro de execução (*runtime exception*) foi identificado nas entradas te
 - **Configuração do ambiente:** A configuração correta do `CLASSPATH` para incluir o JAR do ANTLR tanto na fase de geração do parser quanto na compilação e execução dos arquivos Java gerados exigiu atenção especial, especialmente no Windows com PowerShell, onde o separador de `CLASSPATH` é `;` e não `:`.
 - **Compreensão do pipeline do ANTLR:** Entender o fluxo `CharStream → Lexer → TokenStream → Parser → ParseTree` e como cada componente gerado se interliga foi o principal desafio conceitual desta etapa.
 - **Distinção entre regras léxicas e sintáticas:** No ANTLR 4, regras que iniciam com letra maiúscula são interpretadas como regras léxicas (*tokens*) e regras com letra minúscula como regras sintáticas (*parser rules*). Essa convenção, caso não observada, gera erros silenciosos na gramática.
+- **Ambiguidade em expressões:** A regra `exp op exp` com uma regra `op` separada não resolve precedência de operadores automaticamente no ANTLR 4. A solução adotada foi inlinear os operadores diretamente na regra `exp`, com alternativas ordenadas da maior para a menor precedência.
 
 ---
 
@@ -126,5 +321,5 @@ Nenhum erro de execução (*runtime exception*) foi identificado nas entradas te
 
 | Membro | Participação |
 |---|---|
-| Werbster Marques Teixeira [537205] | Configuração do ambiente ANTLR, definição da gramática `MiniJava.g4`, implementação de `Main.java`, testes de execução e elaboração do README |
-| Guilherme Gomes Botelho | [descrever participação] |
+| Werbster Marques Teixeira [537205] | Configuração do ambiente ANTLR, ajustes na gramática `MiniJava.g4`, implementação de `Main.java`, casos de teste e elaboração do README |
+| Guilherme Gomes Botelho [539008] | Definição da gramática `MiniJava.g4`, revisão dos casos de testes e auxílio na elaboração do README |

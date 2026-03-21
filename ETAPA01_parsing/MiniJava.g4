@@ -1,7 +1,6 @@
 grammar MiniJava;
 
 // --- REGRAS SINTÁTICAS (Parser) ---
-// Regra inicial (o ponto de partida do seu compilador)
 goal 
 	: mainClass classDecl* EOF
 	; 
@@ -54,21 +53,22 @@ statement
 	| Identifier '[' exp ']' '=' exp ';'
 	;
 
-exp 
-	: exp op exp
-	| exp '[' exp ']'
-	| exp '.' 'length'
-	| exp '.' Identifier '(' expList? ')'
-	| INTEGER_LITERAL
-	| 'true'
-	| 'false'
-	| Identifier
-	| 'this'
-	| 'new' 'int' '[' exp ']'
-	| 'new' Identifier '(' ')'
-	| '!' exp
-	| '(' exp ')'
-	;
+exp
+    : exp '[' exp ']'
+    | exp '.' 'length'
+    | exp '.' Identifier '(' expList? ')'
+    | exp ('*') exp          // maior precedência
+    | exp ('+' | '-') exp
+    | exp '<' exp
+    | exp '&&' exp           // menor precedência
+    | INTEGER_LITERAL
+    | 'true' | 'false'
+    | Identifier | 'this'
+    | 'new' 'int' '[' exp ']'
+    | 'new' Identifier '(' ')'
+    | '!' exp
+    | '(' exp ')'
+    ;
 	
 expList
 	: exp expRest*
@@ -93,10 +93,16 @@ INTEGER_LITERAL
 	;
 
 Identifier
-	: [a-zA-Z_][a-zA-Z0-9_]*
+	: [a-zA-Z][a-zA-Z0-9_]*
 	;
 
 // Ignorar espaços em branco, quebras de linha e tabulações
 WS
 	: [ \t\r\n]+ -> skip
 	;
+
+// Linha única
+LINE_COMMENT : '//' ~[\r\n]* -> skip ;
+
+// Bloco (/* ... */) — não-aninhado em ANTLR4
+BLOCK_COMMENT : '/*' .*? '*/' -> skip ;
