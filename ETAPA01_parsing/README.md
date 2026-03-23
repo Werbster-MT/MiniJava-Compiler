@@ -152,6 +152,7 @@ class Factorial {
     System.out.println(new Fac().ComputeFac(10));
   }
 }
+
 class Fac {
   public int ComputeFac(int num) {
     int num_aux;
@@ -162,6 +163,7 @@ class Fac {
     return num_aux;
   }
 }
+
 ```
 
 ![valido_01_factorial](imgs/testes_entradas_validas/valido_01_factorial.png)
@@ -174,15 +176,23 @@ Testa: declarações com `int`, `boolean`, `int[]` e `Identifier` como tipo.
 
 ```java
 class TesteTipos {
-  public static void main(String[] a) { System.out.println(0); }
+  public static void main(String[] a) {                 
+     System.out.println(0); 
+   }
 }
+
 class Tipos {
   public int testaTipos(int x) {
-    int numero;  boolean flag;  int[] vetor;  Tipos obj;
-    numero = 42; flag = true;
+    int numero;  
+    boolean flag;  
+    int[] vetor;  
+    Tipos obj;
+    numero = 42; 
+    flag = true;
     return numero;
   }
 }
+
 ```
 
 ![valido_02_tipos_e_vars](imgs/testes_entradas_validas/valido_02_tipos_e_vars.png)
@@ -194,13 +204,33 @@ class Tipos {
 Testa: operadores `+`, `-`, `*`, `<`, `&&`, acesso a array `v[i]`, `.length`, `new int[]`, `new Classe()`, `!exp`.
 
 ```java
-resultado = v[0] + v[1];   // op: +
-resultado = v[0] - v[1];   // op: -
-resultado = v[0] * v[1];   // op: *
-b = v[0] < v[1];           // op: <
-b = true && false;         // op: &&
-b = !b;                    // ! exp
-resultado = v.length;      // exp.length
+class TesteExp {
+  public static void main(String[] a) {                 
+     System.out.println(new Calc().run()); 
+   }
+}
+
+class Calc {
+  public int run() {
+    int[] v;
+    int resultados;
+    boolean b;
+    
+    v = new int[10];
+    v[0] = 5;
+    v[1] = 3;
+
+    resultado = v[0] + v[1];   // op: +
+    resultado = v[0] - v[1];   // op: -
+    resultado = v[0] * v[1];   // op: *
+    b = v[0] < v[1];           // op: <
+    b = true && false;         // op: &&
+    b = !b;                    // ! exp
+    resultado = v.length;      // exp.length
+    return resultado;
+  }
+}
+
 ```
 
 ![valido_03_expressoes](imgs/testes_entradas_validas/valido_03_expressoes.png)
@@ -211,6 +241,48 @@ resultado = v.length;      // exp.length
 
 Testa: `if/else`, `while`, `System.out.println`, atribuição simples (`id = exp`), atribuição de array (`id[exp] = exp`), bloco `{ statement* }`.
 
+```java
+class TesteStatements {
+  public static void main(String[] a) {                 
+     System.out.println(new Stmts().run()); 
+   }
+}
+
+class Stmts {
+  public int run() {
+    int x;
+    int[] v;
+    int i;
+    
+    x = 0;
+    v = new int[5];
+    i = 0;
+    
+    // while
+    while (i < 5) {
+       v[i] = i;              // atribuição de array
+       i = i + i;             // atribuição simples
+    }
+    
+    // if/else
+    if (x < 1) {
+       x = 10;
+    } else {
+       x = 20;
+    }
+    
+    // bloco aninhado
+    {
+       x = x + 1;
+       System.out.println(x);
+    }
+    
+    return x;
+  }
+}
+
+```
+
 ![valido_04_statements](imgs/testes_entradas_validas/valido_04_statements.png)
 
 ---
@@ -220,9 +292,24 @@ Testa: `if/else`, `while`, `System.out.println`, atribuição simples (`id = exp
 Testa: `classDecl` com `extends`, `formalList` com múltiplos parâmetros (`formalRest`), `expList` com múltiplos argumentos (`expRest`).
 
 ```java
-class Filho extends Pai {
-  public int soma(int a, int b) { return a + b + 1; }
+class TesteHeranca {
+  public static void main(String[] a) {                 
+     System.out.println(new Filho().soma(3, 4)); 
+   }
 }
+
+class Pai {
+  public int soma(int a, int b) {               
+     return a+ b;               
+  }
+}
+
+class Filho extends Pai {
+  public int  soma(int a, int b) {            
+     return a + b + 1;
+  }
+}
+
 ```
 
 ![valido_05_heranca](imgs/testes_entradas_validas/valido_05_heranca.png)
@@ -234,9 +321,15 @@ class Filho extends Pai {
 Testa: regras léxicas `LINE_COMMENT` (`//`) e `BLOCK_COMMENT` (`/* */`) sendo ignoradas pelo lexer.
 
 ```java
-// comentário de linha
-/* comentário de bloco */
-/* comentario inline */ System.out.println(42); // fim de linha
+class TesteComentarios {
+  //  comentario na classe principal
+  public static void main(String[] a) {                 
+     // comentário de linha
+     /* comentário de bloco */
+     /* comentario inline */ System.out.println(42); // fim de linha
+   }
+}
+
 ```
 
 ![valido_06_comentarios](imgs/testes_entradas_validas/valido_06_comentarios.png)
@@ -253,8 +346,11 @@ Programas com erros propositais que devem gerar mensagens de erro do ANTLR.
 
 ```java
 Factorial {  // falta 'class' antes
-  public static void main(String[] a) { ... }
+  public static void main(String[] a) {                 
+     System.out.println(0);
+  }
 }
+
 ```
 
 ![invalido_01_sem_class](imgs/testes_entradas_invalidas/invalido_01_sem_class.png)
@@ -264,7 +360,12 @@ Factorial {  // falta 'class' antes
 #### `invalido_02_id_com_numero.mj` — Identificador começando com dígito
 
 ```java
-class 1Invalido { ... }  // identificador inválido léxicamente
+class 1Invalido {  // identificador inválido léxicamente
+  public static void main(String[] a) {                 
+     System.out.println(0);
+  }
+}
+
 ```
 
 ![invalido_02_id_com_numero](imgs/testes_entradas_invalidas/invalido_02_id_com_numero.png)
@@ -274,10 +375,23 @@ class 1Invalido { ... }  // identificador inválido léxicamente
 #### `invalido_03_if_sem_else.mj` — `if` sem `else`
 
 ```java
-if (x < 1)
-  x = 10;
-// sem 'else' — inválido em MiniJava
-return x;
+class SemElse {
+  public static void main(String[] a) {                 
+     System.out.println(0); 
+   }
+}
+
+class Teste {
+  public int run() {                 
+     int x;                 
+     x = 0;                 
+     if (x < 1)                 
+        x = 10;
+     // sem 'else' — inválido em MiniJava
+     return x;
+   }
+}
+
 ```
 
 ![invalido_03_if_sem_else](imgs/testes_entradas_invalidas/invalido_03_if_sem_else.png)
@@ -287,7 +401,20 @@ return x;
 #### `invalido_04_operador_invalido.mj` — Operador `%` não suportado
 
 ```java
-x = 10 % 3;  // % não existe em MiniJava
+class OpInvalido {
+  public static void main(String[] a) {                 
+     System.out.println(new Calc().run()); 
+   }
+}
+
+class Calc {
+  public int run() {                 
+     int x;                 
+     x = 10 % 3;  // % não existe em MiniJava 
+     return x;
+   }
+}
+
 ```
 
 ![invalido_04_operador_invalido](imgs/testes_entradas_invalidas/invalido_04_operador_invalido.png)
@@ -297,11 +424,20 @@ x = 10 % 3;  // % não existe em MiniJava
 #### `invalido_05_sem_return.mj` — Método sem `return`
 
 ```java
-public int run() {
-  int x;
-  x = 42;
-  // sem 'return' — inválido
+class SemReturn {
+  public static void main(String[] a) {                 
+     System.out.println(0); 
+   }
 }
+
+class Teste {
+  public int run() {                 
+     int x;
+     x = 42;
+     // sem 'return' — inválido
+  }
+}
+
 ```
 
 ![invalido_05_sem_return](imgs/testes_entradas_invalidas/invalido_05_sem_return.png)
