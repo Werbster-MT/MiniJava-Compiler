@@ -77,14 +77,6 @@ expList
 expRest
 	: ',' exp
 	;
-	
-op
-	: '+'
-	| '-'
-	| '*'
-	| '<'
-	| '&&'
-	;
 
 // --- REGRAS LÉXICAS (Lexer) ---
 // Identificadores (nomes de variáveis, classes, etc)
