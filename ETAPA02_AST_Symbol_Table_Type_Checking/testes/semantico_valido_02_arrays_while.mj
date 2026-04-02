@@ -1,0 +1,25 @@
+class MainApp {
+    public static void main(String[] a) {
+        System.out.println(new ArrayTest().run(5));
+    }
+}
+
+class ArrayTest {
+    public int run(int size) {
+        int[] arr;
+        int i;
+        int sum;
+        
+        arr = new int[size];
+        i = 0;
+        sum = 0;
+        
+        while (i < arr.length) {
+            arr[i] = i * 2;
+            sum = sum + arr[i];
+            i = i + 1;
+        }
+        
+        return sum;
+    }
+}

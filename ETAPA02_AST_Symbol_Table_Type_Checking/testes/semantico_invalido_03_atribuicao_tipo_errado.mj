@@ -1,0 +1,16 @@
+// ERRO: atribuição de boolean em variável int
+// Esperado: [ERRO SEMÂNTICO] Tipo incompatível em atribuição de 'x': esperado int, recebeu boolean
+
+class ErroAtribuicaoTipo {
+  public static void main(String[] a) {
+    System.out.println(new Calc().run());
+  }
+}
+
+class Calc {
+  public int run() {
+    int x;
+    x = true;
+    return x;
+  }
+}
