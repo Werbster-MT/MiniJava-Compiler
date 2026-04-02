@@ -1,0 +1,16 @@
+// ERRO: variável 'z' não foi declarada
+// Esperado: [ERRO SEMÂNTICO] Variável não declarada: 'z'
+
+class ErroVarNaoDeclarada {
+  public static void main(String[] a) {
+    System.out.println(new Teste().run());
+  }
+}
+
+class Teste {
+  public int run() {
+    int x;
+    x = z + 1;
+    return x;
+  }
+}
