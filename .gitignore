@@ -8,12 +8,13 @@ target/
 # ANTLR generated
 *.interp
 *.tokens
+parser/
 *Lexer.java
 *Parser.java
 *Listener.java
 *BaseListener.java
-*Visitor.java
-*BaseVisitor.java
+MiniJavaVisitor.java
+MiniJavaBaseVisitor.java
 
 # Eclipse
 .classpath
