@@ -27,7 +27,10 @@ public class TypeCheckVisitor extends TypeDepthFirstVisitor {
 
     @Override
     public Type visit(Program n) {
-        // Visita apenas as classes declaradas (não a MainClass — ela não tem tipo)
+    	// Visita a MainClass
+    	n.m.accept(this);
+    	
+        // Visita as classes declaradas 
         for (int i = 0; i < n.cl.size(); i++)
             n.cl.elementAt(i).accept(this);
         return null;
