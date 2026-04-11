@@ -1,0 +1,19 @@
+class LogicMain {
+    public static void main(String[] a) {
+        System.out.println(new Checker().testLogic(10, 20, true));
+    }
+}
+
+class Checker {
+    public int testLogic(int x, int y, boolean flag) {
+        int result;
+        
+        if ((x < y) && flag) {
+            result = 1;
+        } else {
+            result = 0;
+        }
+        
+        return result;
+    }
+}

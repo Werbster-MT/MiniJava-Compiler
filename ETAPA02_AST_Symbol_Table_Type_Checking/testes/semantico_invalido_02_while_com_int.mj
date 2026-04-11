@@ -1,0 +1,18 @@
+// ERRO: condição do 'while' é boolean literal, mas expressão é inteira
+// Esperado: [ERRO SEMÂNTICO] Condição do 'while' deve ser boolean, recebeu: int
+
+class ErroWhileInt {
+  public static void main(String[] a) {
+    System.out.println(new Conta().run());
+  }
+}
+
+class Conta {
+  public int run() {
+    int i;
+    i = 0;
+    while (i)
+      i = i + 1;
+    return i;
+  }
+}
