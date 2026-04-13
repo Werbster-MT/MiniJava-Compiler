@@ -32,24 +32,24 @@ public class Main {
             System.err.println("\n[ETAPA 01] Erros sintáticos encontrados. Abortando.");
             System.exit(1);
         }
-        System.out.println("[ETAPA 01] Análise léxica e sintática: OK");
+        System.out.println("\n[ETAPA 01] Análise léxica e sintática: OK");
 
         // ── 3. Construção da AST ──────────────────────────────────────────
         BuildASTVisitor builder = new BuildASTVisitor();
         Program ast = (Program) builder.visit(parseTree);
-        System.out.println("[ETAPA 02] AST construída com sucesso.");
+        System.out.println("\n[ETAPA 02] AST construída com sucesso.");
 
         // ── 4. Pretty Print da AST ────────────────────────────────────────
-        System.out.println("\n──── AST (Pretty Print) ────────────────────────────");
+        System.out.println("\n──────────────────────────── AST (Pretty Print) ────────────────────────────\n");
         PrettyPrintVisitor printer = new PrettyPrintVisitor();
         ast.accept(printer);
-        System.out.println("\n────────────────────────────────────────────────────\n");
+        System.out.println("\n────────────────────────────────────────────────────────────────────────────\n");
 
         // ── 5. Construção da Tabela de Símbolos ───────────────────────────
         SymbolTable      symTable = new SymbolTable();
         SymbolTableBuilder stBuilder = new SymbolTableBuilder(symTable);
         ast.accept(stBuilder);
-        System.out.println("[ETAPA 02] Tabela de símbolos construída.");
+        System.out.println("[ETAPA 03] Tabela de símbolos construída.");
         printSymbolTable(symTable);
 
         // ── 6. Verificação de Tipos ───────────────────────────────────────
@@ -58,16 +58,16 @@ public class Main {
 
         int errors = typeChecker.getErrorCount();
         if (errors == 0) {
-            System.out.println("\n[ETAPA 02] Verificação de tipos: OK — nenhum erro semântico.");
+            System.out.println("[ETAPA 04] Verificação de tipos: OK — nenhum erro semântico.");
         } else {
-            System.err.println("\n[ETAPA 02] Verificação de tipos: " + errors + " erro(s) semântico(s) encontrado(s).");
+            System.err.println("[ETAPA 04] Verificação de tipos: " + errors + " erro(s) semântico(s) encontrado(s).");
             System.exit(1);
         }
     }
 
     /** Imprime um resumo da tabela de símbolos para diagnóstico. */
     private static void printSymbolTable(SymbolTable st) {
-        System.out.println("\n──── Tabela de Símbolos ────────────────────────────");
+        System.out.println("\n──────────────────────────── Tabela de Símbolos ────────────────────────────\n");
         for (symboltable.ClassBinding cb : st.getClasses().values()) {
             String ext = cb.superClass != null ? " extends " + cb.superClass : "";
             System.out.println("Classe: " + cb.name + ext);
@@ -86,7 +86,7 @@ public class Main {
                     System.out.println("    local: " + typeName(v.getValue()) + " " + v.getKey());
             }
         }
-        System.out.println("────────────────────────────────────────────────────\n");
+        System.out.println("\n────────────────────────────────────────────────────────────────────────────\n");
     }
 
     private static String typeName(syntaxtree.Type t) {
