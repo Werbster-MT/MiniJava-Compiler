@@ -14,19 +14,18 @@ Esta etapa corresponde à **segunda fase** do desenvolvimento de um compilador p
 - Construção da Tabela de Símbolos
 - Realização da Verificação Semântica (Type Checking)
 
-A partir da árvore sintática concreta (Parse Tree) gerada pelo ANTLR, é utilizado o padrão Visitor para construir a árvore sintática abstrata (AST). Em seguida, outro visitante percorre essa estrutura para coletar informações semânticas (declarações de classes, métodos e variáveis), assim, formando a tabela de símbolos. Por fim, é realizada a verificação de tipos e consistência semântica do programa.
+A partir da árvore sintática concreta (Parse Tree) gerada pelo ANTLR, foi utilizado o padrão Visitor para construir a árvore sintática abstrata (AST). Em seguida, outro visitante percorre essa estrutura para coletar informações semânticas (declarações de classes, métodos e variáveis), assim, formando a tabela de símbolos. Por fim, é realizada a verificação de tipos e de consistência semântica do programa.
 
 ---
 
 ## Status da Etapa
 
-A etapa foi completamente concluída.
+A etapa foi **completamente concluída**.
 
 Foram implementadas as seguintes funcionalidades:
 
 - Construção completa da AST a partir da Parse Tree (BuildASTVisitor)
-- Estrutura completa da AST (syntaxtree/)
-- com suporte a:
+- Estrutura completa da AST (syntaxtree/) com suporte a:
 	- classes simples e com herança
 	- declarações de variáveis e métodos
 	- todos os tipos da linguagem (int, boolean, int[], classes)
@@ -46,15 +45,22 @@ Foram implementadas as seguintes funcionalidades:
 	- verificação de herança 
 	- verificação de tipos em atribuições
 	
--Impressão da AST (PrettyPrintVisitor) para depuração
+- Impressão da AST (PrettyPrintVisitor) para depuração
 
 ---
 
 ## Erros de Execução Encontrados
 
-Nenhum erro de execução (*runtime exception*) foi identificado nas entradas testadas. Todas as entradas válidas foram aceitas pela gramática e produziram a árvore sintática corretamente. As entradas inválidas foram tratadas pelo mecanismo de recuperação de erros padrão do ANTLR (`DefaultErrorStrategy`), que reporta o erro sintático ou léxico no `stderr` **sem interromper abruptamente o processo** — ou seja, não há *crash*, apenas mensagens de erro descritivas.
+Nenhum erro de execução (*runtime exception*) foi identificado nas entradas testadas. Todas as entradas válidas foram aceitas pela gramática e produziram a árvore sintática corretamente. As entradas inválidas foram tratadas pelo mecanismo de recuperação de erros padrão do ANTLR (`DefaultErrorStrategy`), que reporta o erro sintático, léxico ou semântico no `stderr` **sem interromper abruptamente o processo** — ou seja, não há *crash*, apenas mensagens de erro descritivas.
 
-COLOCAR A TABELA DE ERROS
+| Entrada | Tipo de erro reportado | Houve exception? |
+|---|---|---|
+| `semantico_invalido_01_if_com_int.mj` | Erro semântico: `condição do 'if' deve ser boolean, recebeu: int` | Não |
+| `semantico_invalido_02_while_com_int.mj` | Erro semântico: `condição do 'while' deve ser boolean, recebeu: int` | Não |
+| `semantico_invalido_03_atribuicao_tipo_errado.mj` | Erro semântico: `tipo incompatível em atribuição de 'x': esperado int, recebeu boolean` | Não |
+| `semantico_invalido_04_variavel_nao_declarada.mj` | Erro semântico: `variável não declarada: 'z'` | Não |
+| `semantico_invalido_05_soma_de_booleanos.mj` | Erro semântico: `'+' exige int no lado esquerdo e no lado direito` | Não |
+| `semantico_invalido_06_metodo_inexistente.mj` | Erro semântico: `Método 'voar' não encontrado na classe 'Carro'` | Não |
 
 ---
 
@@ -73,12 +79,12 @@ ETAPA02_AST_Symbol_Table_Type_Checking/
 ├── imgs/
 │   ├── testes_entradas_validas/       # Screenshots dos testes válidos
 │   └── testes_entradas_invalidas/     # Screenshots dos testes inválidos
-├── symboltable/
+├── symboltable/                       # # Tabela de símbolos
 │   ├── ClassBinding.java
 │   ├── MethodBinding.java
 │   ├── SymbolTable.java
 │   └── SymbolTableBuilder.java
-├── syntaxtree/
+├── syntaxtree/                        # Estrutura da AST
 │   ├── And.java
 │   ├── ArrayAssign.java
 │   ├── ArrayLength.java
@@ -123,7 +129,7 @@ ETAPA02_AST_Symbol_Table_Type_Checking/
 │   ├── VarDecl.java
 │   ├── VarDeclList.java
 │   └── While.java
-├── testes/
+├── testes/                            # Programas MiniJava corretos e incorretos para teste
 │   ├── semantico_invalido_01_if_com_int.mj
 │   ├── semantico_invalido_02_while_com_int.mj
 │   ├── semantico_invalido_03_atribuicao_tipo_errado.mj
@@ -133,7 +139,7 @@ ETAPA02_AST_Symbol_Table_Type_Checking/
 │   ├── semantico_valido_01_factorial.mj
 │   ├── semantico_valido_02_arrays_while.mj
 │   └── semantico_valido_03_objetos_logica.mj
-└── visitor/
+└── visitor/                           # Implementação do padrão Visitor                                  
     ├── BuildASTVisitor.java
     ├── DepthFirstVisitor.java
     ├── PrettyPrintVisitor.java
@@ -193,11 +199,14 @@ javac -cp ".;C:\antlr\antlr-4.13.2-complete.jar" *.java
 
 ## Execução do Programa
 
-Recomenda-se compilar e executar o projeto via powershell:
+Recomenda-se compilar o projeto e executar os arquivos de teste via powershell usando:
 
 ```bash
-.\build.ps1
-.\run.ps1
+> powershell
+
+>.\build.ps1
+
+>.\run.ps1
 ```
 
 Mas também é possível compilar manualmente:
@@ -206,10 +215,10 @@ Mas também é possível compilar manualmente:
 javac -cp ".;C:\antlr\antlr-4.13.2-complete.jar" parser\*.java syntaxtree\*.java visitor\*.java symboltable\*.java Main.java
 ```
 
-E executar manualmente:
+E executar os arquivos manualmente:
 
 ```java
-java -cp ".;C:\antlr\antlr-4.13.2-complete.jar" Main testes\[Nome do Arquivo].mj
+java -cp ".;C:\antlr\antlr-4.13.2-complete.jar" Main testes\[Nome_do_Arquivo].mj
 ```
 
 ---
@@ -252,7 +261,7 @@ class Fac {
 
 #### `semantico_valido_02_arrays_while.mj` - Percorrer vetor com `While`
 
-Testa: 
+Testa: criação, atribuição e acesso de array, uso de `length`, `while`, controle de fluxo com loop e acúmulo de valores.
 
 ```java
 class MainApp {
@@ -288,7 +297,7 @@ class ArrayTest {
 
 #### `semantico_valido_03_objetos_logica.mj` - Objetos lógicos
 
-Testa: 
+Testa: parâmetros múltiplos (int, int, boolean), expressões booleanas, operadores lógicos (&&), precedência de operadores, avaliação de expressões compostas.
 
 ```java
 class LogicMain {
@@ -460,6 +469,11 @@ class Carro {
 
 ## Dificuldades Encontradas
 
+**Mapeamento Parse Tree para AST:** transformar cada regra da gramatica ANTLR em nos da AST exigiu cuidado para preservar estrutura e precedencia das expressoes.
+- **Contexto semantico (classe/metodo atual):** a verificacao de tipos depende de contexto correto para buscar variaveis locais, parametros e campos.
+- **Compatibilidade de tipos com heranca:** foi necessario tratar compatibilidade entre classes (`subclasse` atribuivel para tipo da `superclasse`).
+- **Organizacao dos visitors:** separar responsabilidades entre construcao da AST, construcao da tabela e type checking foi importante para manter codigo legivel e extensivel.
+- **Fluxo de diagnostico:** padronizar mensagens de erro semantico para facilitar validacao com os casos de teste.
 
 ---
 
