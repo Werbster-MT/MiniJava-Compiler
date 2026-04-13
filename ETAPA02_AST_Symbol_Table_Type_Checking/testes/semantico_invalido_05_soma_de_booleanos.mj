@@ -1,0 +1,17 @@
+// ERRO: soma de booleanos com operador '+'
+// Esperado: [ERRO SEMÂNTICO] '+' exige int no lado esquerdo
+//            [ERRO SEMÂNTICO] '+' exige int no lado direito
+
+class ErroSomaBooleanos {
+  public static void main(String[] a) {
+    System.out.println(new Calc().run());
+  }
+}
+
+class Calc {
+  public int run() {
+    int x;
+    x = true + false;
+    return x;
+  }
+}

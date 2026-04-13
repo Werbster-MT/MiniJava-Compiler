@@ -1,0 +1,14 @@
+// ERRO: método 'voar' não existe na classe 'Carro'
+// Esperado: [ERRO SEMÂNTICO] Método 'voar' não encontrado na classe 'Carro'
+
+class ErroMetodoInexistente {
+  public static void main(String[] a) {
+    System.out.println(new Carro().voar());
+  }
+}
+
+class Carro {
+  public int acelerar() {
+    return 100;
+  }
+}
