@@ -1,4 +1,4 @@
-# Compilador MiniJava para arquitetura MIPS — Analisador Léxico e Sintático [Etapa 01]
+# Compilador MiniJava para arquitetura MIPS — AST e Análise Semântica [Etapa 02]
 
 **Equipe 19**
 - Werbster Marques Teixeira [537205]
@@ -8,19 +8,53 @@
 
 ## Descrição
 
-Esta etapa corresponde à **segunda fase** do desenvolvimento de um compilador para a linguagem MiniJava, cujo alvo é a arquitetura MIPS.
+Esta etapa corresponde à **segunda fase** do desenvolvimento de um compilador para a linguagem MiniJava, cujo alvo é a arquitetura MIPS. O objetivo é estender o front-end previamente implementado (analisador léxico e sintático com ANTLR) para incluir:
+
+- Construção da Árvore Sintática Abstrata (AST)
+- Construção da Tabela de Símbolos
+- Realização da Verificação Semântica (Type Checking)
+
+A partir da árvore sintática concreta (Parse Tree) gerada pelo ANTLR, é utilizado o padrão Visitor para construir a árvore sintática abstrata (AST). Em seguida, outro visitante percorre essa estrutura para coletar informações semânticas (declarações de classes, métodos e variáveis), assim, formando a tabela de símbolos. Por fim, é realizada a verificação de tipos e consistência semântica do programa.
 
 ---
 
 ## Status da Etapa
 
-A etapa está **em desenvolvimento**.
+A etapa foi completamente concluída.
 
+Foram implementadas as seguintes funcionalidades:
+
+- Construção completa da AST a partir da Parse Tree (BuildASTVisitor)
+- Estrutura completa da AST (syntaxtree/)
+- com suporte a:
+	- classes simples e com herança
+	- declarações de variáveis e métodos
+	- todos os tipos da linguagem (int, boolean, int[], classes)
+	- statements (if, while, print, atribuições, blocos)
+	- expressões (aritméticas, lógicas, chamadas de método, arrays, etc.)
+	
+- Construção da tabela de símbolos (SymbolTableBuilder)
+
+- Estrutura de bindings:
+	- ClassBinding
+	- MethodBinding
+	
+- Verificação semântica (TypeCheckVisitor), incluindo:
+	- verificação de declaração de variáveis
+	- verificação de tipos em expressões
+	- verificação de chamadas de método (existência e tipo de retorno)
+	- verificação de herança 
+	- verificação de tipos em atribuições
+	
+-Impressão da AST (PrettyPrintVisitor) para depuração
 
 ---
 
 ## Erros de Execução Encontrados
 
+Nenhum erro de execução (*runtime exception*) foi identificado nas entradas testadas. Todas as entradas válidas foram aceitas pela gramática e produziram a árvore sintática corretamente. As entradas inválidas foram tratadas pelo mecanismo de recuperação de erros padrão do ANTLR (`DefaultErrorStrategy`), que reporta o erro sintático ou léxico no `stderr` **sem interromper abruptamente o processo** — ou seja, não há *crash*, apenas mensagens de erro descritivas.
+
+COLOCAR A TABELA DE ERROS
 
 ---
 
@@ -158,6 +192,25 @@ javac -cp ".;C:\antlr\antlr-4.13.2-complete.jar" *.java
 ---
 
 ## Execução do Programa
+
+Recomenda-se compilar e executar o projeto via powershell:
+
+```bash
+.\build.ps1
+.\run.ps1
+```
+
+Mas também é possível compilar manualmente:
+
+```java
+javac -cp ".;C:\antlr\antlr-4.13.2-complete.jar" parser\*.java syntaxtree\*.java visitor\*.java symboltable\*.java Main.java
+```
+
+E executar manualmente:
+
+```java
+java -cp ".;C:\antlr\antlr-4.13.2-complete.jar" Main testes\[Nome do Arquivo].mj
+```
 
 ---
 
@@ -414,5 +467,5 @@ Placeholder de Imagem
 
 | Membro | Participação |
 |---|---|
-| Werbster Marques Teixeira [537205] | 
-| Guilherme Gomes Botelho [539008] | 
+| Werbster Marques Teixeira [537205] | Implementação da AST, Visitors, Tabela de Símbolos e análise semântica
+| Guilherme Gomes Botelho [539008] | Revisão da gramática, realização de testes, elaboração do README e validação da etapa
