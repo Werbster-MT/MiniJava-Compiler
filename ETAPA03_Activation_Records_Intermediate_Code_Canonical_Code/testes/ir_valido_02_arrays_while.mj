@@ -1,0 +1,22 @@
+class ArraysWhile {
+  public static void main(String[] a) {
+    System.out.println(new Arr().run(5));
+  }
+}
+
+class Arr {
+  public int run(int size) {
+    int[] arr;
+    int i;
+    int sum;
+    arr = new int[size];
+    i = 0;
+    sum = 0;
+    while (i < size) {
+      arr[i] = i;
+      sum = sum + arr[i];
+      i = i + 1;
+    }
+    return sum + arr.length;
+  }
+}
