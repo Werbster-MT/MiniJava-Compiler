@@ -58,6 +58,9 @@ public class MipsFrame extends frame.Frame {
 
     @Override
     public Tree.Stm procEntryExit1(Tree.Stm body) {
-        return body;
+        return new Tree.SEQ(
+            new Tree.LABEL(name),
+            body
+        );
     }
 }
