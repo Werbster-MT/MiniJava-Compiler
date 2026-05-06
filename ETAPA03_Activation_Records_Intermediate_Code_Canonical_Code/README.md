@@ -20,6 +20,34 @@ As três grandes responsabilidades desta etapa são:
 
 ---
 
+## Status da Etapa
+
+A etapa foi **completamente concluída**.
+
+Foram implementadas/concluídas as seguintes funcionalidades:
+
+- Implementação de `frame/Access.java` e `frame/Frame.java`
+- Implementação de `mips/InFrame.java`, `mips/InReg.java` e `mips/MipsFrame.java`
+- Implementação de `visitor/IRGenVisitor.java` para traduzir os principais nós da AST para IR
+- Integração da ETAPA03 com a ETAPA02 em `Main.java` (parse + AST + tabela + typecheck + IR + canonização)
+- Pipeline canônico funcionando: `Canon.linearize` → `BasicBlocks` → `TraceSchedule`
+- Scripts de build e execução: `build.ps1` e `run.ps1`
+- `procEntryExit1` implementado em `MipsFrame` salvando e restaurando `$ra` e callee-saves na entrada e saída do frame.
+- Como em MiniJava as variáveis e parâmetros não escapam, o *escape analysis* atribui `false` para o escape de todos os locais e parâmetros de forma segura.
+
+---
+
+## Erros de Execução Encontrados
+
+Nenhum erro de execução (*runtime exception*) foi identificado nas entradas testadas. Todas as entradas válidas geraram as árvores IR e código canônico corretamente. As entradas inválidas foram interceptadas nas fases anteriores (sintática ou semântica) abortando a execução com erro no `stderr` sem interromper abruptamente (*crash*) e sem chegar a gerar uma IR mal formada.
+
+| Entrada | Tipo de erro reportado | Houve exception? |
+|---|---|---|
+| `ir_invalido_01_sintaxe.mj` | Erro sintático: `mismatched input ')' expecting ...` | Não |
+| `ir_invalido_02_semantica.mj` | Erro semântico: `Tipo incompatível em atribuição de 'b': esperado boolean, recebeu int` | Não |
+
+---
+
 ## O que o Framework já fornece
 
 Os arquivos abaixo **já estão implementados** no projeto e devem ser utilizados sem alteração:
@@ -152,42 +180,7 @@ Responsabilidades:
 package mips;
 
 public class MipsFrame extends frame.Frame {
-    private int offset = 0;
-    public static final int wordSize = 4;
-    private Temp.Temp fp = new Temp.Temp(); // $fp
-    private Temp.Temp rv = new Temp.Temp(); // $v0
-
-    public MipsFrame(Temp.Label name, Util.BoolList formals) {
-        this.name = name;
-        // para cada parâmetro, aloca InFrame ou InReg
-        // e popula this.formals
-    }
-
-    public frame.Access allocLocal(boolean escape) {
-        if (escape) {
-            offset -= wordSize;
-            return new InFrame(offset);
-        } else {
-            return new InReg(new Temp.Temp());
-        }
-    }
-
-    public Tree.Exp exp(frame.Access acc, Tree.Exp fp) {
-        return acc.exp(fp);
-    }
-
-    public Tree.Exp externalCall(String func, Tree.ExpList args) {
-        return new Tree.CALL(new Tree.NAME(new Temp.Label(func)), args);
-    }
-
-    public Temp.Temp FP() { return fp; }
-    public Temp.Temp RV() { return rv; }
-    public int wordSize() { return wordSize; }
-
-    public Tree.Stm procEntryExit1(Tree.Stm body) {
-        // Aqui: mover parâmetros para seus Temps, salvar $ra
-        return body; // mínimo válido para começar
-    }
+    // ...
 }
 ```
 
@@ -197,10 +190,6 @@ public class MipsFrame extends frame.Frame {
 
 Este é o **núcleo da etapa**: um visitor que percorre cada nó da AST (do pacote `syntaxtree`) e devolve um nó da IR Tree.
 
-Como a AST tem dois tipos de nós — `Exp` (expressões, que têm valor) e `Statement` (efeitos) — o visitor precisa retornar `Tree.Exp` ou `Tree.Stm` dependendo do caso. Uma abordagem comum é usar duas interfaces separadas:
-
-#### Estrutura sugerida
-
 ```java
 package visitor;
 
@@ -208,51 +197,7 @@ import syntaxtree.*;
 import Tree.*;
 
 public class IRGenVisitor {
-
-    private frame.Frame currentFrame;
-    private symboltable.SymbolTable table;
-    private String currentClass;
-    private String currentMethod;
-
-    public IRGenVisitor(symboltable.SymbolTable t) {
-        this.table = t;
-    }
-
-    // === Expressões — retornam Tree.Exp ===
-
-    public Tree.Exp transExp(syntaxtree.Exp e) {
-        if (e instanceof IntegerLiteral) return transIntLiteral((IntegerLiteral) e);
-        if (e instanceof True)           return new Tree.CONST(1);
-        if (e instanceof False)          return new Tree.CONST(0);
-        if (e instanceof This)           return new Tree.TEMP(currentFrame.FP());
-        if (e instanceof Plus)           return transBinop((Plus) e);
-        if (e instanceof Minus)          return transMinusOp((Minus) e);
-        if (e instanceof Times)          return transMulOp((Times) e);
-        if (e instanceof LessThan)       return transLessThan((LessThan) e);
-        if (e instanceof And)            return transAnd((And) e);
-        if (e instanceof Not)            return transNot((Not) e);
-        if (e instanceof IdentifierExp)  return transId((IdentifierExp) e);
-        if (e instanceof NewObject)      return transNewObject((NewObject) e);
-        if (e instanceof NewArray)       return transNewArray((NewArray) e);
-        if (e instanceof ArrayLookup)    return transArrayLookup((ArrayLookup) e);
-        if (e instanceof ArrayLength)    return transArrayLength((ArrayLength) e);
-        if (e instanceof Call)           return transCall((Call) e);
-        throw new Error("IRGen: expressão desconhecida: " + e.getClass());
-    }
-
-    // === Statements — retornam Tree.Stm ===
-
-    public Tree.Stm transStm(syntaxtree.Statement s) {
-        if (s instanceof Block)       return transBlock((Block) s);
-        if (s instanceof If)          return transIf((If) s);
-        if (s instanceof While)       return transWhile((While) s);
-        if (s instanceof Print)       return transPrint((Print) s);
-        if (s instanceof Assign)      return transAssign((Assign) s);
-        if (s instanceof ArrayAssign) return transArrayAssign((ArrayAssign) s);
-        throw new Error("IRGen: statement desconhecido: " + s.getClass());
-    }
-
-    // ... implementações de cada método trans*() ...
+    // ...
 }
 ```
 
@@ -304,24 +249,6 @@ Canon.TraceSchedule traces = new Canon.TraceSchedule(blocos);
 Tree.StmList codigoCanônico = traces.stms;
 ```
 
-#### O que `Canon.linearize` garante
-
-- Nenhum `SEQ` aninhado: a lista resultante é plana
-- Nenhum `ESEQ` dentro de expressões
-- Todo `CALL` que não é o único lado de um `MOVE(TEMP, CALL)` é envolvido em `MOVE(new TEMP(), CALL)`, evitando perda do valor de retorno
-
-#### O que `BasicBlocks` garante
-
-- Todo bloco começa com exatamente um `LABEL`
-- Todo bloco termina com exatamente um `JUMP` ou `CJUMP`
-- Não há `LABEL` no meio nem `JUMP`/`CJUMP` antes do fim
-
-#### O que `TraceSchedule` garante
-
-- Os blocos são reordenados em "traces" (caminhos prováveis de execução)
-- Todo `CJUMP` tem o rótulo **falso** imediatamente após ele na lista (exigência do seletor de instruções MIPS)
-- `JUMP` para o próximo bloco são eliminados quando possível
-
 ---
 
 ## Estrutura do Projeto
@@ -364,13 +291,15 @@ ETAPA03_Activation_Records_Intermediate_Code_Canonical_Code/
 ├── visitor/                     # [A IMPLEMENTAR] Geração de IR Tree
 │   └── IRGenVisitor.java
 │
-├── Main.java                    # [A IMPLEMENTAR/ADAPTAR] Ponto de entrada
+├── Main.java                    # Ponto de entrada
 ├── build.ps1
 ├── run.ps1
 └── testes/
     ├── ir_valido_01_factorial.mj
     ├── ir_valido_02_arrays_while.mj
-    └── ir_valido_03_objetos_logica.mj
+    ├── ir_valido_03_objetos_logica.mj
+    ├── ir_invalido_01_sintaxe.mj
+    └── ir_invalido_02_semantica.mj
 ```
 
 ---
@@ -382,74 +311,33 @@ O compilador já possui, da ETAPA02:
 - **Tabela de Símbolos** (`symboltable/SymbolTable`)
 - **Verificação Semântica** (`visitor/TypeCheckVisitor`)
 
-O `Main.java` da ETAPA03 deve reutilizar o mesmo pipeline de parsing e construção da AST, e em seguida invocar o novo `IRGenVisitor`:
-
-```java
-// Após o TypeCheckVisitor da ETAPA02 validar sem erros:
-IRGenVisitor irGen = new IRGenVisitor(symbolTable);
-
-// Para cada método de cada classe:
-for (cada MethodDecl m : programa) {
-    MipsFrame frame = new MipsFrame(
-        new Temp.Label(className + "_" + methodName),
-        formaisEscape(m)
-    );
-    irGen.setFrame(frame);
-    Tree.Stm irBody = irGen.transMethodDecl(m);
-
-    // Pipeline de canonização:
-    Tree.StmList linear = Canon.linearize(irBody);
-    Canon.BasicBlocks blocos = new Canon.BasicBlocks(linear);
-    Canon.TraceSchedule traces = new Canon.TraceSchedule(blocos);
-
-    // Imprimir para debug:
-    Tree.Print printer = new Tree.Print(System.out);
-    for (Tree.StmList l = traces.stms; l != null; l = l.tail)
-        printer.prStm(l.head);
-}
-```
-
----
-
-## Status de Conclusão da Etapa
-
-A ETAPA03 foi **parcialmente concluída**.
-
-### O que foi concluído
-
-- Implementação de `frame/Access.java` e `frame/Frame.java`
-- Implementação de `mips/InFrame.java`, `mips/InReg.java` e `mips/MipsFrame.java`
-- Implementação de `visitor/IRGenVisitor.java` para traduzir os principais nós da AST para IR
-- Integração da ETAPA03 com a ETAPA02 em `Main.java` (parse + AST + tabela + typecheck + IR + canonização)
-- Pipeline canônico funcionando: `Canon.linearize` → `BasicBlocks` → `TraceSchedule`
-- Scripts de build e execução: `build.ps1` e `run.ps1`
-- Conjunto de testes válidos da etapa: `testes/ir_valido_01_factorial.mj`, `testes/ir_valido_02_arrays_while.mj`, `testes/ir_valido_03_objetos_logica.mj`
-
-### O que não foi concluído
-
-- `procEntryExit1` ainda está em versão mínima (retorna o corpo sem salvar/restaurar `$ra` e sem tratamento de callee-saves)
-- Estratégia de *escape analysis* está simplificada (não há análise completa de escapes via passagem dedicada)
+O `Main.java` da ETAPA03 reutiliza o mesmo pipeline de parsing e construção da AST, e em seguida invoca o novo `IRGenVisitor`.
 
 ---
 
 ## Pré-Requisitos
 
-- **Java JDK** 8 ou superior
-- **ANTLR 4.13.2**
-  - `C:\antlr\antlr-4.13.2-complete.jar`
+- **Java JDK** 8 ou superior instalado e configurado no `PATH`
+- **ANTLR 4.13.2** — arquivo JAR completo (`antlr-4.13.2-complete.jar`) disponível localmente
+  - Download: [https://www.antlr.org/download/antlr-4.13.2-complete.jar](https://www.antlr.org/download/antlr-4.13.2-complete.jar)
+  - Recomenda-se salvar em `C:\antlr\antlr-4.13.2-complete.jar`
 - ETAPA02 disponível no mesmo workspace (classes de `syntaxtree`, `visitor` e `symboltable`)
+- Variável de ambiente `CLASSPATH` configurada para incluir o JAR do ANTLR e o diretório da Etapa02:
+  ```
+  set CLASSPATH=.;C:\antlr\antlr-4.13.2-complete.jar;..\ETAPA02_AST_Symbol_Table_Type_Checking
+  ```
 
 ---
 
-## Setup e Compilação
+## Setup
 
-No diretório `ETAPA03_Activation_Records_Intermediate_Code_Canonical_Code`, executar:
+No diretório `ETAPA03_Activation_Records_Intermediate_Code_Canonical_Code`, você pode gerar o build rodando:
 
 ```powershell
 .\build.ps1
 ```
 
-Saída esperada:
+Isso compilará as classes dos diretórios e da ETAPA02. Saída esperada:
 
 ```text
 Build ETAPA03 concluido com sucesso!
@@ -457,144 +345,150 @@ Build ETAPA03 concluido com sucesso!
 
 ---
 
-## Execução
+## Execução do Programa
 
-### Executar um teste específico
+Recomenda-se compilar o projeto e executar os arquivos de teste via powershell usando:
+
+```powershell
+> powershell
+
+> .\build.ps1
+
+> .\run.ps1
+```
+
+Mas também é possível compilar manualmente e testar arquivos um por um:
 
 ```powershell
 java -cp ".;C:\antlr\antlr-4.13.2-complete.jar;..\ETAPA02_AST_Symbol_Table_Type_Checking" Main "testes\ir_valido_01_factorial.mj"
 ```
 
-### Executar todos os testes da ETAPA03
+---
 
-```powershell
-.\run.ps1
-```
+## Testes Realizados
 
 ---
 
-## Programa Foi Testado Com Quais Entradas?
+### Entradas Válidas
 
-As entradas usadas foram:
-
-- `testes/ir_valido_01_factorial.mj`
-- `testes/ir_valido_02_arrays_while.mj`
-- `testes/ir_valido_03_objetos_logica.mj`
-
-Esses testes cobrem:
-
-- chamadas de método e recursão
-- `if/else` e `while`
-- arrays (`new int[]`, `arr[i]`, `arr.length`)
-- operadores aritméticos e lógicos (`<`, `&&`, `!`)
-- passagem de `this` como primeiro argumento implícito em chamadas de método
+Programas que seguem a gramática MiniJava, passam pela análise semântica e chegam a ter sua Árvore de Código Intermediário (IR) gerada.
 
 ---
 
-## Algum Erro de Execução Foi Encontrado?
+#### `ir_valido_01_factorial.mj`
 
-Para as três entradas válidas acima, **não foram encontrados erros de execução**.
-
-Os três testes executaram com sucesso e imprimiram IR canônica contendo:
-
-- `CALL(NAME(...), ...)` com `this` como primeiro argumento quando aplicável
-- `CJUMP` para controle de fluxo de `if/while` e curto-circuito
-- operações de array com `MEM(BINOP(...))`
-- saída linearizada e organizada por `TraceSchedule`
-
----
-
-## Demonstração de Execução
-
-### Comandos executados
-
-```powershell
-.\build.ps1
-java -cp ".;C:\antlr\antlr-4.13.2-complete.jar;..\ETAPA02_AST_Symbol_Table_Type_Checking" Main "testes\ir_valido_01_factorial.mj"
-java -cp ".;C:\antlr\antlr-4.13.2-complete.jar;..\ETAPA02_AST_Symbol_Table_Type_Checking" Main "testes\ir_valido_02_arrays_while.mj"
-java -cp ".;C:\antlr\antlr-4.13.2-complete.jar;..\ETAPA02_AST_Symbol_Table_Type_Checking" Main "testes\ir_valido_03_objetos_logica.mj"
-```
-
-### Exemplo de saída (trecho) — `ir_valido_01_factorial.mj`
+Testa: chamadas de método e recursão.
 
 ```text
 ===== Factorial_main =====
 LABEL L7
 MOVE(
- TEMP t8,
+ TEMP t12,
+ TEMP t0)
+...
+MOVE(
+ TEMP t37,
  CALL(
   NAME malloc,
    CONST 0))
 MOVE(
- TEMP t7,
+ TEMP t36,
  CALL(
   NAME Fac_ComputeFac,
-   TEMP t8,
+   TEMP t37,
    CONST 10))
 EXP(
  CALL(
   NAME print_int,
-   TEMP t7))
+   TEMP t36))
+...
 ```
 
-### Exemplo de saída (trecho) — `ir_valido_02_arrays_while.mj`
+---
+
+#### `ir_valido_02_arrays_while.mj`
+
+Testa: arrays (`new int[]`, `arr[i]`, `arr.length`) e laços `while`.
 
 ```text
 ===== Arr_run =====
+LABEL Arr_run
 MOVE(
- TEMP t5,
+ TEMP t25,
  CALL(
   NAME malloc,
    BINOP(MUL,
-    MEM(
-     BINOP(PLUS,
-      TEMP t3,
-      CONST -8)),
+    TEMP t24,
     CONST 4)))
 ...
 MOVE(
- TEMP t4,
+ TEMP t22,
  BINOP(PLUS,
-  TEMP t7,
+  TEMP t27,
   MEM(
    BINOP(MINUS,
-    TEMP t5,
+    TEMP t25,
     CONST 4))))
+...
 ```
 
-### Exemplo de saída (trecho) — `ir_valido_03_objetos_logica.mj`
+---
+
+#### `ir_valido_03_objetos_logica.mj`
+
+Testa: operadores aritméticos e lógicos (`<`, `&&`, `!`) e passagem de `this` como argumento implícito em chamadas de método.
 
 ```text
 ===== Calc_run =====
+LABEL Calc_run
 ...
 CJUMP(LT,
- MEM(
-  BINOP(PLUS,
-   TEMP t3,
-   CONST -8)),
- MEM(
-  BINOP(PLUS,
-   TEMP t3,
-   CONST -12)),
+ TEMP t24,
+ TEMP t25,
  L6,L7)
 ...
 CJUMP(EQ,
  BINOP(XOR,
-  TEMP t8,
+  TEMP t29,
   CONST 1),
  CONST 0,
  L4,L5)
+...
+```
+
+---
+
+### Entradas Inválidas
+
+Programas com erros propositais (seja de sintaxe ou semântica) que são detectados antes que a IR seja gerada. O programa aborta para não gerar representações mal-formadas.
+
+---
+
+#### `ir_invalido_01_sintaxe.mj`
+
+```text
+line 3:31 mismatched input ')' expecting {'(', 'true', 'false', 'this', 'new', '!', INTEGER_LITERAL, Identifier}
+Erros sintaticos encontrados. Abortando.
+```
+
+---
+
+#### `ir_invalido_02_semantica.mj`
+
+```text
+[ERRO SEMÂNTICO] Tipo incompatível em atribuição de 'b': esperado boolean, recebeu int
+Erros semanticos encontrados. Abortando.
 ```
 
 ---
 
 ## Dificuldades Encontradas
 
-- **Decisão de escape:** para um frame completo, a análise de escape ideal exige uma passagem prévia dedicada na AST.
+- **Decisão de escape:** embora a análise de escape ideal exija uma passagem prévia na AST para linguagens complexas, em MiniJava (onde variáveis não escapam) foi possível adotar uma estratégia determinística e segura (`escape = false`).
 - **Tradução de booleanos com curto-circuito (`&&`, `!`):** foi necessário modelar `&&` com `CJUMP`s encadeados e labels intermediários.
 - **`LessThan` como expressão:** como `CJUMP` é `Stm`, foi necessário encapsular em `ESEQ` com `TEMP` resultado.
 - **Ordem dos argumentos em `CALL`:** em MiniJava, `this` é argumento implícito e precisa ser o primeiro na `ExpList`.
-- **`procEntryExit1` completo:** salvar/restaurar `$ra` e callee-saves corretamente é um passo adicional importante para fechar totalmente a etapa.
+- **`procEntryExit1` completo:** a implementação de salvar/restaurar `$ra` e callee-saves exigiu o entendimento correto de como mapear registradores para Temporários dentro da IR Tree.
 - **Compatibilidade de nomes de arquivos no Windows:** conflito entre nomes que diferem apenas por caixa (como `Exp` e `EXP`) exigiu ajuste para manter build estável no ambiente local.
 
 ---

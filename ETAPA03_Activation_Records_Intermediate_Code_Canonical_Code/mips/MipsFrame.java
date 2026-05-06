@@ -6,6 +6,11 @@ public class MipsFrame extends frame.Frame {
 
     private final Temp.Temp fp = new Temp.Temp();
     private final Temp.Temp rv = new Temp.Temp();
+    private static final Temp.Temp RA = new Temp.Temp();
+    private static final Temp.Temp[] CALLEE_SAVES = new Temp.Temp[] {
+        new Temp.Temp(), new Temp.Temp(), new Temp.Temp(), new Temp.Temp(), 
+        new Temp.Temp(), new Temp.Temp(), new Temp.Temp(), new Temp.Temp()
+    };
 
     public MipsFrame(Temp.Label name, Util.BoolList formalEscapes) {
         this.name = name;
@@ -58,9 +63,31 @@ public class MipsFrame extends frame.Frame {
 
     @Override
     public Tree.Stm procEntryExit1(Tree.Stm body) {
+        Temp.Temp tRA = new Temp.Temp();
+        Tree.Stm saveRA = new Tree.MOVE(new Tree.TEMP(tRA), new Tree.TEMP(RA));
+        Tree.Stm restoreRA = new Tree.MOVE(new Tree.TEMP(RA), new Tree.TEMP(tRA));
+
+        Temp.Temp[] tSaves = new Temp.Temp[CALLEE_SAVES.length];
+        Tree.Stm saveSaves = null;
+        Tree.Stm restoreSaves = null;
+
+        for (int i = 0; i < CALLEE_SAVES.length; i++) {
+            tSaves[i] = new Temp.Temp();
+            Tree.Stm save = new Tree.MOVE(new Tree.TEMP(tSaves[i]), new Tree.TEMP(CALLEE_SAVES[i]));
+            Tree.Stm restore = new Tree.MOVE(new Tree.TEMP(CALLEE_SAVES[i]), new Tree.TEMP(tSaves[i]));
+            saveSaves = saveSaves == null ? save : new Tree.SEQ(saveSaves, save);
+            restoreSaves = restoreSaves == null ? restore : new Tree.SEQ(restoreSaves, restore);
+        }
+
+        Tree.Stm entry = new Tree.SEQ(saveRA, saveSaves);
+        Tree.Stm exit = new Tree.SEQ(restoreSaves, restoreRA);
+
         return new Tree.SEQ(
-            new Tree.LABEL(name),
-            body
+            entry,
+            new Tree.SEQ(
+                body,
+                exit
+            )
         );
     }
 }

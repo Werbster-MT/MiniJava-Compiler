@@ -131,9 +131,9 @@ public class IRGenVisitor {
     private Util.BoolList formalEscapes(MethodDecl m) {
         Util.BoolList list = null;
         for (int i = m.fl.size() - 1; i >= 0; i--) {
-            list = new Util.BoolList(true, list);
+            list = new Util.BoolList(false, list);
         }
-        return new Util.BoolList(true, list);
+        return new Util.BoolList(false, list);
     }
 
     public Tree.Exp transExp(Exp e) {
