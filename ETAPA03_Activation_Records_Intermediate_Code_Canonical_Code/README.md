@@ -32,7 +32,7 @@ Foram implementadas/concluídas as seguintes funcionalidades:
 - Integração da ETAPA03 com a ETAPA02 em `Main.java` (parse + AST + tabela + typecheck + IR + canonização)
 - Pipeline canônico funcionando: `Canon.linearize` → `BasicBlocks` → `TraceSchedule`
 - Scripts de build e execução: `build.ps1` e `run.ps1`
-- `procEntryExit1` implementado em `MipsFrame` salvando e restaurando `$ra` e callee-saves na entrada e saída do frame.
+- `procEntryExit1` implementado em `MipsFrame`, sendo responsável por adicionar o rótulo de entrada do método e garantir a estrutura básica do corpo na IR.
 - Como em MiniJava as variáveis e parâmetros não escapam, o *escape analysis* atribui `false` para o escape de todos os locais e parâmetros de forma segura.
 
 ---
@@ -267,7 +267,7 @@ ETAPA03_Activation_Records_Intermediate_Code_Canonical_Code/
 │   └── BoolList.java
 │
 ├── IR Tree/                     # Pacote Tree (fornecido — não alterar)
-│   ├── Stm.java / Exp1.java     # Classes base abstratas
+│   ├── Stm.java / Exp.java     # Classes base abstratas
 │   ├── SEQ, LABEL, JUMP, CJUMP, MOVE, EXP  (Stm)
 │   ├── BINOP, MEM, TEMP, NAME, CONST, CALL, ESEQ  (Exp)
 │   ├── ExpList.java / StmList.java
@@ -324,7 +324,7 @@ O `Main.java` da ETAPA03 reutiliza o mesmo pipeline de parsing e construção da
 - ETAPA02 disponível no mesmo workspace (classes de `syntaxtree`, `visitor` e `symboltable`)
 - Variável de ambiente `CLASSPATH` configurada para incluir o JAR do ANTLR e o diretório da Etapa02:
   ```
-  set CLASSPATH=.;C:\antlr\antlr-4.13.2-complete.jar;..\ETAPA02_AST_Symbol_Table_Type_Checking
+  set CLASSPATH=.;C:\antlr\antlr-4.13.2-complete.jar;..\ETAPA03_Activation_Records_Intermediate_Code_Canonical_Code
   ```
 
 ---
@@ -360,7 +360,7 @@ Recomenda-se compilar o projeto e executar os arquivos de teste via powershell u
 Mas também é possível compilar manualmente e testar arquivos um por um:
 
 ```powershell
-java -cp ".;C:\antlr\antlr-4.13.2-complete.jar;..\ETAPA02_AST_Symbol_Table_Type_Checking" Main "testes\ir_valido_01_factorial.mj"
+java -cp ".;C:\antlr\antlr-4.13.2-complete.jar;..\ETAPA03_Activation_Records_Intermediate_Code_Canonical_Code" Main "testes\ir_valido_01_factorial.mj"
 ```
 
 ---
