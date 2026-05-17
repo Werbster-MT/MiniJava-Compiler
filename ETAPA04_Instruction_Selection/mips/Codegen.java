@@ -224,7 +224,7 @@ public class Codegen {
         Temp r = new Temp();
         Temp retReg = frame.RV();
         
-        TempList calleeDefs = new TempList(retReg, null);
+        TempList calleeDefs = new TempList(retReg, frame.callerSaves());
 
         if (c.func instanceof Tree.NAME) {
             emit(new OPER("jal " + ((Tree.NAME) c.func).label.toString(), calleeDefs, args));

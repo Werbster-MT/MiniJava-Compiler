@@ -7,10 +7,47 @@ public class MipsFrame extends frame.Frame {
     private final Temp.Temp fp = new Temp.Temp();
     private final Temp.Temp rv = new Temp.Temp();
     private static final Temp.Temp RA = new Temp.Temp();
+    private static final Temp.Temp ZERO = new Temp.Temp();
+    private static final Temp.Temp SP = new Temp.Temp();
+    
     private static final Temp.Temp[] CALLEE_SAVES = new Temp.Temp[] {
         new Temp.Temp(), new Temp.Temp(), new Temp.Temp(), new Temp.Temp(), 
         new Temp.Temp(), new Temp.Temp(), new Temp.Temp(), new Temp.Temp()
     };
+    
+    private static final Temp.Temp[] CALLER_SAVES = new Temp.Temp[] {
+        new Temp.Temp(), new Temp.Temp(), new Temp.Temp(), new Temp.Temp(), // a0-a3
+        new Temp.Temp(), new Temp.Temp(), new Temp.Temp(), new Temp.Temp(), // t0-t3
+        new Temp.Temp(), new Temp.Temp(), new Temp.Temp(), new Temp.Temp(), // t4-t7
+        new Temp.Temp(), new Temp.Temp()                                    // t8-t9
+    };
+
+    public Temp.TempList callerSaves() {
+        Temp.TempList list = new Temp.TempList(RA, null); // jal clobbers $ra
+        for (int i = CALLER_SAVES.length - 1; i >= 0; i--) {
+            list = new Temp.TempList(CALLER_SAVES[i], list);
+        }
+        return list;
+    }
+
+    public String tempMap(Temp.Temp t) {
+        if (t == fp) return "$fp";
+        if (t == rv) return "$v0";
+        if (t == RA) return "$ra";
+        if (t == SP) return "$sp";
+        if (t == ZERO) return "$zero";
+        for (int i = 0; i < CALLEE_SAVES.length; i++) {
+            if (t == CALLEE_SAVES[i]) return "$s" + i;
+        }
+        for (int i = 0; i < CALLER_SAVES.length; i++) {
+            if (t == CALLER_SAVES[i]) {
+                if (i < 4) return "$a" + i;
+                if (i < 12) return "$t" + (i - 4);
+                return "$t" + (i - 4); // t8, t9
+            }
+        }
+        return null; // ou t.toString()
+    }
 
     public MipsFrame(Temp.Label name, Util.BoolList formalEscapes) {
         this.name = name;

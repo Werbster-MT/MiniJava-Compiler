@@ -27,6 +27,8 @@ Foram implementadas/concluídas as seguintes funcionalidades:
 - Aproveitamento de constantes em operações aritméticas com `addi`.
 - Integração da ETAPA04 com todas as etapas anteriores no `Main.java` (mantendo o estado persistente do `Frame` para recuperar o registrador `RV`).
 - Scripts de build e execução (`build.ps1` e `run.ps1`) devidamente atualizados para a nova etapa.
+- **Preparação para Liveness Analysis (Etapa 05):** Propagação correta dos registradores `caller-saves` e `RA` na lista de sujos (`calleeDefs`) nas instruções de chamada (`jal`) em `Codegen.java`.
+- **Mapeamento de Registradores MIPS:** Adição do suporte a registradores como `$sp`, `$zero` e implementação do método `tempMap` no `MipsFrame.java` para traduzir temps em strings da arquitetura.
 
 ---
 
