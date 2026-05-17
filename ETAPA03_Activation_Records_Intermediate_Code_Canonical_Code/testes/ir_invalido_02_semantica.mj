@@ -1,0 +1,15 @@
+class Main {
+    public static void main(String[] args) {
+        System.out.println(new A().run());
+    }
+}
+
+class A {
+    public int run() {
+        int x;
+        boolean b;
+        x = 10;
+        b = x; // Erro semantico: tipo incompativel (atribuindo int a boolean)
+        return x;
+    }
+}
