@@ -126,7 +126,7 @@ O `Main.java` da ETAPA04 executa todas as etapas progressivamente:
 - **ANTLR 4.13.2** — arquivo JAR completo (`antlr-4.13.2-complete.jar`) disponível localmente
   - Download: [https://www.antlr.org/download/antlr-4.13.2-complete.jar](https://www.antlr.org/download/antlr-4.13.2-complete.jar)
   - Recomenda-se salvar em `C:\antlr\antlr-4.13.2-complete.jar`
-- ETAPA02 disponível no mesmo workspace (classes de `syntaxtree`, `visitor` e `symboltable`)
+- ETAPA03 disponível no mesmo workspace (classes de `syntaxtree`, `visitor` e `symboltable`)
 - Variável de ambiente `CLASSPATH` configurada para incluir o JAR do ANTLR e o diretório da Etapa02:
   ```
   set CLASSPATH=.;C:\antlr\antlr-4.13.2-complete.jar;..\ETAPA04_Instruction_Selection
@@ -165,7 +165,7 @@ Recomenda-se compilar o projeto e executar os arquivos de teste via powershell u
 Mas também é possível executar manualmente e testar arquivos um por um apontando o arquivo desejado:
 
 ```powershell
-java -cp ".;C:\antlr\antlr-4.13.2-complete.jar;..\ETAPA02_AST_Symbol_Table_Type_Checking" Main "testes\ir_valido_01_factorial.mj"
+java -cp ".;C:\antlr\antlr-4.13.2-complete.jar;..\ETAPA04_Instruction_Selection" Main "testes\ir_valido_01_factorial.mj"
 ```
 
 ---
@@ -227,6 +227,145 @@ L1:
 	lw t53, 0(t54)     # Ladrilho para Load word
 	add t52, t27, t53
 ...
+```
+---
+
+#### `ir_valido_03_objetos_logica.mj`
+
+Testa: operadores aritméticos e lógicos (`<`, `&&`, `!`) e passagem de `this` como argumento implícito em chamadas de método.
+
+```text
+===== ObjetosLogica_main (Assembly) =====
+L13:
+        move t12, t0
+        move t13, t1
+        move t14, t2
+        move t15, t3
+        move t16, t4
+        move t17, t5
+        move t18, t6
+        move t19, t7
+        move t20, t8
+        li t55, 0
+        jal malloc
+        move t56, t10
+        move t54, t56
+        li t57, 3
+        li t58, 4
+        jal Calc_run
+        move t59, t10
+        move t53, t59
+        jal print_int
+        move t60, t10
+        move t1, t13
+        move t2, t14
+        move t3, t15
+        move t4, t16
+        move t5, t17
+        move t6, t18
+        move t7, t19
+        move t8, t20
+        move t0, t12
+        j L12
+L12:
+
+===== Calc_run (Assembly) =====
+L15:
+        move t30, t0
+        move t31, t1
+        move t32, t2
+        move t33, t3
+        move t34, t4
+        move t35, t5
+        move t36, t6
+        move t37, t7
+        move t38, t8
+Calc_run:
+        li t26, 0
+        li t27, 0
+        li t28, 0
+        blt t24, t25, L6
+L7:
+L8:
+        li t61, 0
+        beq t28, t61, L4
+L3:
+        li t29, 0
+        li t62, 0
+        blt t24, t62, L9
+L10:
+L11:
+        li t64, 1
+        xor t63, t29, t64
+        li t65, 0
+        beq t63, t65, L4
+L5:
+        li t66, 0
+        bne t27, t66, L0
+L1:
+        li t26, 1
+L2:
+        move t22, t26
+        move t1, t31
+        move t2, t32
+        move t3, t33
+        move t4, t34
+        move t5, t35
+        move t6, t36
+        move t7, t37
+        move t8, t38
+        move t0, t30
+        j L14
+L6:
+        li t28, 1
+        j L8
+L9:
+        li t29, 1
+        j L11
+L16:
+        li t27, 1
+        j L5
+L4:
+        j L5
+L0:
+        jal Calc_add
+        move t67, t22
+        move t26, t67
+        j L2
+L14:
+
+===== Calc_add (Assembly) =====
+L18:
+        move t44, t0
+        move t45, t1
+        add t68, t42, t43
+        move t40, t68
+        move t1, t45
+        move t2, t46
+        move t3, t47
+        move t4, t48
+        move t5, t49
+        move t6, t50
+        move t7, t51
+        move t8, t52
+        move t0, t44
+        j L17
+L17:
+```
+
+---
+
+### Entradas Inválidas
+
+Programas que não passam pela gramática e, por isso, não chegam na fase de seleção do códgio, imprimindo apenas o erro encontrado.
+
+---
+
+#### `ir_invalido_01_sintaxe.mj`
+
+```text
+line 3:31 mismatched input ')' expecting {'(', 'true', 'false', 'this', 'new', '!', INTEGER_LITERAL, Identifier}
+Erros sintaticos encontrados. Abortando.
 ```
 
 ---
