@@ -128,8 +128,8 @@ O `Main.java` da ETAPA04 executa todas as etapas progressivamente:
 - **ANTLR 4.13.2** — arquivo JAR completo (`antlr-4.13.2-complete.jar`) disponível localmente
   - Download: [https://www.antlr.org/download/antlr-4.13.2-complete.jar](https://www.antlr.org/download/antlr-4.13.2-complete.jar)
   - Recomenda-se salvar em `C:\antlr\antlr-4.13.2-complete.jar`
-- ETAPA02 disponível no mesmo workspace (classes de `syntaxtree`, `visitor` e `symboltable`)
-- Variável de ambiente `CLASSPATH` configurada para incluir o JAR do ANTLR e o diretório da Etapa02:
+- ETAPA03 disponível no mesmo workspace (classes de `syntaxtree`, `visitor` e `symboltable`)
+- Variável de ambiente `CLASSPATH` configurada para incluir o JAR do ANTLR e o diretório da Etapa04:
   ```
   set CLASSPATH=.;C:\antlr\antlr-4.13.2-complete.jar;..\ETAPA04_Instruction_Selection
   ```
@@ -167,7 +167,7 @@ Recomenda-se compilar o projeto e executar os arquivos de teste via powershell u
 Mas também é possível executar manualmente e testar arquivos um por um apontando o arquivo desejado:
 
 ```powershell
-java -cp ".;C:\antlr\antlr-4.13.2-complete.jar;..\ETAPA02_AST_Symbol_Table_Type_Checking" Main "testes\ir_valido_01_factorial.mj"
+java -cp ".;C:\antlr\antlr-4.13.2-complete.jar;..\ETAPA04_Instruction_Selection" Main "testes\ir_valido_01_factorial.mj"
 ```
 
 ---
@@ -186,6 +186,7 @@ Demonstra o uso extensivo de alocação, parâmetros (identificados nos temps vi
 
 ```assembly
 ===== Fac_ComputeFac (Assembly) =====
+...
 L9:
 	move t27, t0
 	move t28, t1
@@ -229,6 +230,27 @@ L1:
 	lw t53, 0(t54)     # Ladrilho para Load word
 	add t52, t27, t53
 ...
+```
+---
+
+### Entradas Inválidas
+
+Programas que não passam pela gramática e, por isso, não chegam na fase de seleção do códgio, imprimindo apenas o erro encontrado.
+
+---
+
+#### `ir_invalido_01_sintaxe.mj`
+
+```text
+line 3:31 mismatched input ')' expecting {'(', 'true', 'false', 'this', 'new', '!', INTEGER_LITERAL, Identifier}
+Erros sintaticos encontrados. Abortando.
+```
+
+#### `ir_invalido_02_semantica.mj`
+
+```text
+[ERRO SEMÂNTICO] Tipo incompatível em atribuição de 'b': esperado boolean, recebeu int
+Erros semanticos encontrados. Abortando.
 ```
 
 ---
