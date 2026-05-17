@@ -235,7 +235,7 @@ L1:
 
 ### Entradas Inválidas
 
-Programas que não passam pela gramática e, por isso, não chegam na fase de seleção do códgio, imprimindo apenas o erro encontrado.
+Programas que não passam pela gramática e, por isso, não chegam na fase de seleção do código, imprimindo apenas o erro encontrado.
 
 ---
 
