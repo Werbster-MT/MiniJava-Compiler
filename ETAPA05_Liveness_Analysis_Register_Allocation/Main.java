@@ -1,0 +1,99 @@
+import java.util.Map;
+
+import org.antlr.v4.runtime.CharStream;
+import org.antlr.v4.runtime.CharStreams;
+import org.antlr.v4.runtime.CommonTokenStream;
+import org.antlr.v4.runtime.tree.ParseTree;
+
+import Canon.BasicBlocks;
+import Canon.Canon;
+import Canon.TraceSchedule;
+import parser.MiniJavaLexer;
+import parser.MiniJavaParser;
+import symboltable.SymbolTable;
+import symboltable.SymbolTableBuilder;
+import syntaxtree.Program;
+import visitor.BuildASTVisitor;
+import visitor.IRGenVisitor;
+import visitor.TypeCheckVisitor;
+
+public class Main {
+
+    public static void main(String[] args) throws Exception {
+        if (args.length == 0) {
+            System.out.println("Uso: java Main <arquivo.mj>");
+            return;
+        }
+
+        CharStream input = CharStreams.fromFileName(args[0]);
+        MiniJavaLexer lexer = new MiniJavaLexer(input);
+        CommonTokenStream tokens = new CommonTokenStream(lexer);
+        MiniJavaParser parser = new MiniJavaParser(tokens);
+        ParseTree parseTree = parser.goal();
+
+        if (parser.getNumberOfSyntaxErrors() > 0) {
+            System.err.println("Erros sintaticos encontrados. Abortando.");
+            System.exit(1);
+        }
+
+        BuildASTVisitor builder = new BuildASTVisitor();
+        Program ast = (Program) builder.visit(parseTree);
+
+        SymbolTable symbolTable = new SymbolTable();
+        SymbolTableBuilder stBuilder = new SymbolTableBuilder(symbolTable);
+        ast.accept(stBuilder);
+
+        TypeCheckVisitor typeChecker = new TypeCheckVisitor(symbolTable);
+        ast.accept(typeChecker);
+        if (typeChecker.getErrorCount() > 0) {
+            System.err.println("Erros semanticos encontrados. Abortando.");
+            System.exit(1);
+        }
+
+        IRGenVisitor irGen = new IRGenVisitor(symbolTable);
+        Map<String, Tree.Stm> methods = irGen.transProgram(ast);
+
+        Map<String, frame.Frame> frames = irGen.getFrames();
+
+        for (Map.Entry<String, Tree.Stm> entry : methods.entrySet()) {
+            Tree.StmList linear = Canon.linearize(entry.getValue());
+            BasicBlocks blocks = new BasicBlocks(linear);
+            TraceSchedule traces = new TraceSchedule(blocks);
+
+            System.out.println("===== " + entry.getKey() + " (Assembly) =====");
+            
+            frame.Frame f = frames.get(entry.getKey());
+            mips.Codegen codegen = new mips.Codegen((mips.MipsFrame) f);
+            
+            Assem.InstrList body = null;
+            Assem.InstrList last = null;
+
+            for (Tree.StmList l = traces.stms; l != null; l = l.tail) {
+                Assem.InstrList instrList = codegen.codegen(l.head);
+                if (instrList != null) {
+                    if (body == null) {
+                        body = instrList;
+                        last = instrList;
+                    } else {
+                        last.tail = instrList;
+                    }
+                    while (last.tail != null) {
+                        last = last.tail;
+                    }
+                }
+            }
+            
+            // Instancia a etapa de Alocacao de Registradores
+            RegAlloc.RegAlloc alloc = new RegAlloc.RegAlloc(f, body);
+
+            for (Assem.InstrList il = body; il != null; il = il.tail) {
+                if (il.head instanceof Assem.LABEL) {
+                    System.out.println(il.head.format(alloc));
+                } else {
+                    System.out.println("\t" + il.head.format(alloc));
+                }
+            }
+            System.out.println();
+        }
+    }
+}
