@@ -163,6 +163,7 @@ O `run.ps1` executará o Main do compilador em todos os `.java` do diretório `t
 Abaixo, temos os códigos MIPS para cada um dos 8 programas de exemplo no Framework:
 
 Obs1: A principal distinção da ETAPA 05 está na geração final do Assembly MIPS **sem a presença de variáveis temporárias literais**.
+
 Obs2: Dentre os códigos é possível encontrar alguns avisos de detecção de transbordamentos, isso ocorre, pois, nessa etapa, o programa faz a deteção de quando ocorrer os transbordamento, mas não realiza o tratamento do mesmo. 
 
 ### BinarySearch.java
@@ -5035,7 +5036,7 @@ L160:
 
 ## Dificuldades Encontradas
 
-- **Ameaça Incessante de "Spill":** A infraestrutura padrão MIPS (`MipsFrame`) do projeto reservava as 8 cores normais (`$s0-$s7`) para temporários callee-saves (que precisam sobreviver cruzando nós `JAL`). Como métodos recursivos e complexos (ex: testes de remoção e pesquisa binária) carregavam mais de 8 temporários simultaneamente vivos durante `jal` (por conta do parâmetro `this`, salvamento da chamada de retorno (`RA`) e outras variáveis), o compilador estourava essas 8 opções rapidamente correndo o risco de gerar ponteiros `null` e obrigando o projeto a fazer _"Spill"_ para a memória (o que estenderia drasticamente a complexidade do trabalho exigindo reescrita de IR). A solução inteligente adotada para desviar dessa restrição foi simular registradores ociosos (`$v1, $t8, $t9, $k0, $k1`) providenciando mais cores "callee-save" de suporte interno exclusivamente para a tabela de coloração do MipsFrame, suprimindo o Spill por completo nos métodos exigidos.
+- **Ameaça Incessante de "Spill":** A infraestrutura padrão MIPS (`MipsFrame`) do projeto reservava as 8 cores normais (`$s0-$s7`) para temporários callee-saves (que precisam sobreviver cruzando nós `JAL`). Como métodos recursivos e complexos (ex: testes de remoção e pesquisa binária) carregavam mais de 8 temporários simultaneamente vivos durante `jal` (por conta do parâmetro `this`, salvamento da chamada de retorno (`RA`) e outras variáveis), o compilador estourava essas 8 opções rapidamente correndo o risco de gerar ponteiros `null` e obrigando o projeto a fazer _"Spill"_ para a memória (o que estenderia drasticamente a complexidade do trabalho exigindo reescrita de IR). 
 - **Concatenação de Blocos Básicos:** O RegAlloc precisa ser executado numa passada inteira por todo o método, mas a saída da fase anterior (`Codegen`) dividiu as instruções num nível granular de statements (`Traces.stms`). Foi imperativo criar um mecanismo de linkagem (junção de `InstrList`) no fluxo do `Main` antes da montagem e alocação do grafo.
 
 ---
